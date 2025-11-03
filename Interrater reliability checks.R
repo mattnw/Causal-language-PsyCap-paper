@@ -59,11 +59,10 @@ rater1_df$confounds <- factor(rater1_df$confounds,
 
 # RENAMING VARIABLES --------
 
-#Renames variables in rate 2 dataframe to be more concise and bettermatch rater 1 names, 
+#Renames variables in rate 2 dataframe to be more concise and better match rater 1 names, 
 #but first appending with ".raw" for preprocessed entries.
 
 rater2_df <- rename(rater2_df,
-                    "identifier" = "Article.Identifier",
                     "IV" =  "Independent.variable.s..of.interest",
                     "DV" = "Outcome.variable.s..of.interest",
                     "abs.link.sentence" = "Abstract..Primary.Linking.Sentence.s.",
@@ -86,20 +85,7 @@ rater2_df <- rename(rater2_df,
                     "confounds.raw" = "Anywhere.in.text..Is..confounding....confounders...or..third.variable..discussed.or.mentioned.in.relation.to.the.methods..results..and.or.interpretation.of.this.study.",
                     )
 
-# CREATE PROCESSED VERSIONS OF RATER 2 ENTRIES TO MATCH RATER 1 PROCESSED DATA FORMAT ------------
-
-# A function to convert a string to a strength rating (since this will be useful for several variables)
-strength_function <- function(x){
-  factor(
-    ifelse(grepl("^Strong", x), "Strong",
-           ifelse(grepl("^Weak", x), "Weak",
-                  ifelse(grepl("^Moderate", x), "Moderate", 
-                         ifelse(grepl("^None", x), "None",
-                                NA)))),
-    levels = c("Strong", "Moderate", "Weak", "None"), ordered = TRUE
-  )
-}
-
+# EXTRACT ROOT WORDS FROM LINKING PHRASES FOR RATER 2 ---------------
 # Transform abstract linking phrases to root words
 
 abs_root_map <- c(
@@ -171,6 +157,22 @@ dis_root_map <- c(
 # Map each term to its root word
 rater2_df$dis.root <- map_chr(rater2_df$dis.link.phrase, ~ dis_root_map[.x])
 
+
+# CREATE PROCESSED VERSIONS OF RATER 2 ENTRIES TO MATCH RATER 1 PROCESSED DATA FORMAT ------------
+
+# A function to convert a string to a strength rating (since this will be useful for several variables)
+strength_function <- function(x){
+  factor(
+    ifelse(grepl("^Strong", x), "Strong",
+           ifelse(grepl("^Weak", x), "Weak",
+                  ifelse(grepl("^Moderate", x), "Moderate", 
+                         ifelse(grepl("^None", x), "None",
+                                NA)))),
+    levels = c("Strong", "Moderate", "Weak", "None"), ordered = TRUE
+  )
+}
+
+# Create processed variables
 rater2_df$abs.strength <- strength_function(rater2_df$abs.strength.raw)
 
 rater2_df$abs.action <- factor(ifelse(nzchar(rater2_df$abs.action.raw), "Yes", "No"),
@@ -216,21 +218,20 @@ rater2_df = rater2_df[, c("Timestamp", "Article.Title", "identifier", "IV","DV",
 
 # RELIABILITY ESTIMATES --------
 
-
-#Get percent agreement function
+#A function to extract percent agreement for descriptive purposes
 get_percent <- function(x, y){
   matches <- na.omit(x == y)
   percent = sum(matches)/length(matches)
   percent
 }
 
-#Function to get a nice row of kappa output
+#Function to get a nice row of Cohen's kappa output
 extract_row <- function(table, weighted, x, y){
   kappa_result <- cohen.kappa(table)
   c(if (weighted == TRUE) kappa_result$confi[2,] else kappa_result$confi[1,], percent = get_percent(x, y), weighted = weighted)
 }
 
-
+# Calculate reliability estimates for different variables, using weighted kappa for ordinal variables
 table_abs.strength <- table(rater1_df$abs.strength, rater2_df$abs.strength)
 abs.strength.out <- extract_row(table_abs.strength, weighted = TRUE, rater1_df$abs.strength, rater2_df$abs.strength)
 
@@ -298,19 +299,7 @@ table_out <- rbind(
 
 table_out
 
-#Need to identify disagreements to discuss?
 
-agreements <- function(variable){
-  r1 <- rater1_df[[variable]]
-  r2 <- rater2_df[[variable]] 
-  (r1 == r2) | (is.na(r1) & is.na(r2))
-}
-main_vars <- c("abs.strength", "abs.action", "abs.action.strength", "causal.model.yn",
-              "control", "dis.strength", "dis.action", "dis.action.strength", "disclaimer",
-              "causal.intent", "confounds")
-
-agreement_data <- sapply(X = main_vars, FUN = agreements)
-write.csv(agreement_data, "agreements data.csv")
 write.csv(rater2_df, "Rater 2 processed data.csv")
 write.csv(table_out, "Kappa results.csv")
 
