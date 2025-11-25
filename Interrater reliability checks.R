@@ -1,26 +1,5 @@
-# REVISION PLAN ---------
-
-"In response to the concerns raised here, as well as by Carlsson & Maatman, 
-we will enlist the help of another independent reviewer to conduct independent double coding. 
-We have identified a suitable reviewer who is willing to do so, and who has not seen the existing ratings. 
-
-We plan to add this reviewer as a co-author at the R&R stage.
-
-This reviewer will be trained on the same two training articles that the initial reviewer (first author) 
-and second author used to calibrate responses. They will then go through the data extraction process. 
-
-We will then compare the extracted data to the first reviewer’s data, calculate measurement error and 
-report on points of discussion.  We will re-run analyses with the data extracted by the independent reviewer. 
-
-When reporting our findings, we will retain the original codings, and will report on interrater reliability. 
-Specifically, we will calculate interrater reliability for each variable rated. 
-For dichotomous or other nominal ratings we will use Cohen's kappa, and for the ordinal variables we will use weighted kappa.
-
-Additionally, we would be happy to share a supplemental table with more examples to provide greater detail as 
-to how the ratings were determined.
-"
-
 # LOAD DATA AND PACKAGES ----------
+# The two lines below assume that the named files are present in the user's working directory (e.g., an RStudio project folder)
 rater1_df <- read.csv("PsyCap Review_R data file.csv")
 rater2_df <- read.csv("Second rater_PsyCap Review Tool (Responses).csv")
 library(dplyr)
@@ -225,7 +204,7 @@ get_percent <- function(x, y){
   percent
 }
 
-#Function to get a nice row of Cohen's kappa output
+#A function to get a nice row of Cohen's kappa output
 extract_row <- function(table, weighted, x, y){
   kappa_result <- cohen.kappa(table)
   c(if (weighted == TRUE) kappa_result$confi[2,] else kappa_result$confi[1,], percent = get_percent(x, y), weighted = weighted)
@@ -298,8 +277,3 @@ table_out <- rbind(
 )
 
 table_out
-
-
-write.csv(rater2_df, "Rater 2 processed data.csv")
-write.csv(table_out, "Kappa results.csv")
-
