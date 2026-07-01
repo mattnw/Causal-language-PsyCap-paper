@@ -277,3 +277,8 @@ table_out <- rbind(
 )
 
 table_out
+
+range(table_out[,"estimate"]) #Range for Cohen's kappa
+#Range for Cohen's kappa, excluding outlying minimum value (acknowledgement of intent to draw causal inferences)
+range(table_out[table_out[, "estimate"] != min(table_out[, "estimate"]), "estimate"]) 
+range(table_out[,"percent"]) #Range for percent agreement

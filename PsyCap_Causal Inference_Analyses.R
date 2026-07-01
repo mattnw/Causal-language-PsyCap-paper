@@ -167,7 +167,7 @@ MultinomCI(freq_table18, conf.level = 0.95, method="sisonglaz")
 
     #In action recommendations
     disclaimer.yes<-subset(data,data$disclaimer=="Yes")
-    freq_table21=table(disclaimer.yes$dis.action.strength)
+    freq_table21=table(disclaimer.yes$dis.action.strength, useNA = "always")
     prop.table(freq_table21)
 
     MultinomCI(freq_table21, conf.level = 0.95, method="sisonglaz")
