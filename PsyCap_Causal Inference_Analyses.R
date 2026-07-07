@@ -26,7 +26,7 @@ prop.table(freq_table4)
 
 MultinomCI(freq_table4, conf.level = 0.95, method="sisonglaz")
 
-#Calculate the frequency & proportions of the causal strength ratings of root words identified in the abstracts
+#Calculate the frequency & proportions of the causal strength ratings of linking sentences identified in the abstracts
 freq_table5=table(data$abs.strength)
 
 freq_table5
@@ -40,7 +40,7 @@ prop.table(freq_table6, margin = 1)
 
 apply(X = freq_table6, MARGIN = 1, FUN = MultinomCI, method="sisonglaz", simplify = FALSE)
 
-#Calculate the frequency & proportions of the causal strength ratings of root words identified in the discussions
+#Calculate the frequency & proportions of the causal strength ratings of linking sentences identified in the discussions
 freq_table7=table(data$dis.strength)
 freq_table7
 prop.table(freq_table7)
@@ -134,6 +134,15 @@ freq_table15=table(data$causal.model.yn)
 prop.table(freq_table15)
 MultinomCI(freq_table15, conf.level = 0.95, method="sisonglaz")
 
+#Calculate the proportions of different causal models
+freq_table15a=table(data$causal.model.type)
+prop.table(freq_table15a)
+sum(prop.table(freq_table15a)[grepl("Structural equations model", 
+                                    names(freq_table15a))]) # Proportion using an SEM (with or without flow chart)
+sum(prop.table(freq_table15a)[grepl("Flow chart with directed arrows", 
+                                    names(freq_table15a))]) # Proportion using flow charts (with or without SEM)
+MultinomCI(freq_table15a, conf.level = 0.95, method="sisonglaz")
+
 #Calculate the proportion that use confounds
 freq_table16=table(data$confounds)
 prop.table(freq_table16)
@@ -155,6 +164,7 @@ MultinomCI(freq_table18, conf.level = 0.95, method="sisonglaz")
     disclaimer.yes<-subset(data,data$disclaimer=="Yes")
     freq_table19=table(disclaimer.yes$abs.strength)
     prop.table(freq_table19)
+    sum(prop.table(freq_table19)[-1]) #Proportion of articles which warned against causal interpretation but implied causality in abstract
 
     MultinomCI(freq_table19, conf.level = 0.95, method="sisonglaz")
 
